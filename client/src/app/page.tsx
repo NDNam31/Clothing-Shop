@@ -1,10 +1,31 @@
 import { Header } from '@/components/layout/Header';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Button } from '@/components/ui/Button';
-import { mockProducts } from '@/lib/mock-data';
-import Image from 'next/image';
+import { Product } from '@/types';
+// import { mockProducts } from '@/lib/mock-data'; // Remove mock data
 
-export default function Home() {
+async function getProducts(): Promise<Product[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  try {
+    const res = await fetch(`${apiUrl}/products`, {
+      cache: 'no-store',
+    });
+    
+    if (!res.ok) {
+      console.error('Failed to fetch products');
+      return [];
+    }
+    
+    return res.json();
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const products = await getProducts();
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -12,7 +33,6 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative bg-gray-900 text-white">
         <div className="absolute inset-0 overflow-hidden">
-           {/* Placeholder for Hero Image */}
            <div className="h-full w-full bg-gradient-to-r from-gray-900 to-gray-800 opacity-90" />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
@@ -40,9 +60,15 @@ export default function Home() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-          {mockProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {products.length > 0 ? (
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <p className="col-span-4 text-center text-gray-500 py-10">
+              Chưa có sản phẩm nào. Hãy thêm sản phẩm từ trang Admin.
+            </p>
+          )}
         </div>
       </main>
 

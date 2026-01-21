@@ -2,19 +2,21 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterPage() {
-  const router = useRouter();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,16 +25,25 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert('Mật khẩu không khớp!');
+      setError('Mật khẩu xác nhận không khớp!');
       return;
     }
+    
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setError('');
+
+    try {
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+      });
+      // Redirect handled in AuthContext (actually context redirects to login currently)
+    } catch (err: any) {
+      setError(err.message || 'Đăng ký thất bại');
       setLoading(false);
-      alert('Đăng ký thành công (Simulation)');
-      router.push('/login');
-    }, 1000);
+    }
   };
 
   return (
@@ -48,6 +59,8 @@ export default function RegisterPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+
           <div className="space-y-4">
             <Input
               label="Họ và tên"
@@ -56,6 +69,14 @@ export default function RegisterPage() {
               required
               placeholder="Nguyễn Văn A"
               value={formData.name}
+              onChange={handleChange}
+            />
+            <Input
+              label="Số điện thoại"
+              name="phone"
+              type="tel"
+              placeholder="0901234567"
+              value={formData.phone}
               onChange={handleChange}
             />
             <Input
