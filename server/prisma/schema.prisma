@@ -1,0 +1,246 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum BodyType {
+  slim
+  normal
+  chubby
+  muscular
+}
+
+enum SkinTone {
+  light
+  medium
+  dark
+}
+
+enum ProductGender {
+  male
+  female
+  unisex
+}
+
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum OrderStatus {
+  pending
+  paid
+  shipped
+  completed
+  cancelled
+}
+
+enum Season {
+  summer
+  winter
+  all
+}
+
+enum BehaviorAction {
+  view
+  add_to_cart
+  purchase
+  like
+}
+
+enum ChatSender {
+  user
+  ai
+}
+
+// Models
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String?   @db.VarChar(100)
+  email         String    @unique @db.VarChar(150)
+  password_hash String    @db.Text
+  phone         String?   @db.VarChar(20)
+  role          Role      @default(USER)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  // Relations
+  profile       UserProfile?
+  orders        Order[]
+  behaviors     UserBehavior[]
+  chatHistory   ChatHistory[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  user_id          String    @id @db.Uuid
+  gender           Gender?
+  height           Int?      // cm
+  weight           Int?      // kg
+  body_type        BodyType?
+  skin_tone        SkinTone?
+  style_preference String?   @db.Text
+  created_at       DateTime  @default(now())
+
+  // Relations
+  user             User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Category {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String     @db.VarChar(100)
+  slug      String     @unique @db.VarChar(100)
+  parent_id String?    @db.Uuid
+
+  // Relations
+  parent    Category?  @relation("CategoryParent", fields: [parent_id], references: [id])
+  children  Category[] @relation("CategoryParent")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String         @db.VarChar(255)
+  description String?        @db.Text
+  price       Decimal        @db.Decimal(10, 2)
+  category_id String?        @db.Uuid
+  gender      ProductGender?
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  // Relations
+  category    Category?      @relation(fields: [category_id], references: [id])
+  variants    ProductVariant[]
+  images      ProductImage[]
+  aiAttributes ProductAiAttribute?
+  behaviors   UserBehavior[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid()) @db.Uuid
+  product_id String?  @db.Uuid
+  size       Size?
+  color      String?  @db.VarChar(50)
+  stock      Int?     @default(0)
+
+  // Relations
+  product    Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id         String   @id @default(uuid()) @db.Uuid
+  product_id String?  @db.Uuid
+  image_url  String   @db.Text
+  is_main    Boolean  @default(false)
+
+  // Relations
+  product    Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Order {
+  id          String      @id @default(uuid()) @db.Uuid
+  user_id     String?     @db.Uuid
+  total_price Decimal     @db.Decimal(10, 2)
+  status      OrderStatus @default(pending)
+  created_at  DateTime    @default(now())
+
+  // Relations
+  user        User?       @relation(fields: [user_id], references: [id])
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 String          @id @default(uuid()) @db.Uuid
+  order_id           String?         @db.Uuid
+  product_variant_id String?         @db.Uuid
+  quantity           Int
+  price              Decimal         @db.Decimal(10, 2)
+
+  // Relations
+  order              Order?          @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  variant            ProductVariant? @relation(fields: [product_variant_id], references: [id])
+
+  @@map("order_items")
+}
+
+model ProductAiAttribute {
+  product_id           String   @id @db.Uuid
+  style_tags           String?  @db.Text
+  suitable_body_type   String?  @db.Text
+  suitable_height_min  Int?
+  suitable_height_max  Int?
+  suitable_weight_min  Int?
+  suitable_weight_max  Int?
+  occasion             String?  @db.Text
+  season               Season?
+
+  // Relations
+  product              Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@map("product_ai_attributes")
+}
+
+model UserBehavior {
+  id         String         @id @default(uuid()) @db.Uuid
+  user_id    String?        @db.Uuid
+  product_id String?        @db.Uuid
+  action     BehaviorAction
+  created_at DateTime       @default(now())
+
+  // Relations
+  user       User?          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product    Product?       @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@map("user_behaviors")
+}
+
+model ChatHistory {
+  id         String     @id @default(uuid()) @db.Uuid
+  user_id    String?    @db.Uuid
+  message    String     @db.Text
+  sender     ChatSender
+  created_at DateTime   @default(now())
+
+  // Relations
+  user       User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("chat_histories")
+}
