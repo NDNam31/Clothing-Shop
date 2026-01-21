@@ -1,0 +1,71 @@
+import { Product, Category } from '../types';
+
+export const mockCategories: Category[] = [
+  { id: '1', name: 'Áo Thun', slug: 'ao-thun' },
+  { id: '2', name: 'Quần Jeans', slug: 'quan-jeans' },
+  { id: '3', name: 'Váy Đầm', slug: 'vay-dam' },
+  { id: '4', name: 'Áo Khoác', slug: 'ao-khoac' },
+];
+
+export const mockProducts: Product[] = [
+  {
+    id: '1',
+    name: 'Áo Thun Basic Cotton',
+    description: 'Áo thun chất liệu cotton 100% thoáng mát, thấm hút mồ hôi.',
+    price: 150000,
+    category_id: '1',
+    category: mockCategories[0],
+    image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=500',
+    gender: 'unisex',
+  },
+  {
+    id: '2',
+    name: 'Quần Jeans Slim Fit',
+    description: 'Quần jeans dáng ôm, co giãn nhẹ, phong cách trẻ trung.',
+    price: 350000,
+    category_id: '2',
+    category: mockCategories[1],
+    image_url: 'https://images.unsplash.com/photo-1542272617-08f083157f0d?auto=format&fit=crop&q=80&w=500',
+    gender: 'male',
+  },
+  {
+    id: '3',
+    name: 'Váy Hoa Nhí Vintage',
+    description: 'Váy liền thân họa tiết hoa nhí, chất vải voan nhẹ nhàng.',
+    price: 280000,
+    category_id: '3',
+    category: mockCategories[2],
+    image_url: 'https://images.unsplash.com/photo-1618932260643-2b672a55a7a9?auto=format&fit=crop&q=80&w=500',
+    gender: 'female',
+  },
+  {
+    id: '4',
+    name: 'Áo Khoác Bomber',
+    description: 'Áo khoác bomber cá tính, giữ ấm tốt cho mùa đông.',
+    price: 450000,
+    category_id: '4',
+    category: mockCategories[3],
+    image_url: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=500',
+    gender: 'unisex',
+  },
+  {
+    id: '5',
+    name: 'Áo Polo Nam',
+    description: 'Áo polo lịch lãm, phù hợp đi làm và đi chơi.',
+    price: 220000,
+    category_id: '1',
+    category: mockCategories[0],
+    image_url: 'https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&q=80&w=500',
+    gender: 'male',
+  },
+  {
+    id: '6',
+    name: 'Chân Váy Xếp Ly',
+    description: 'Chân váy ngắn xếp ly phong cách Hàn Quốc.',
+    price: 190000,
+    category_id: '3',
+    category: mockCategories[2],
+    image_url: 'https://images.unsplash.com/photo-1582142327529-4d61896d468d?auto=format&fit=crop&q=80&w=500',
+    gender: 'female',
+  },
+];
