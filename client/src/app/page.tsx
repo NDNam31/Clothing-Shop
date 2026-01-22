@@ -2,7 +2,6 @@ import { Header } from '@/components/layout/Header';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Button } from '@/components/ui/Button';
 import { Product } from '@/types';
-// import { mockProducts } from '@/lib/mock-data'; // Remove mock data
 
 async function getProducts(): Promise<Product[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -16,7 +15,14 @@ async function getProducts(): Promise<Product[]> {
       return [];
     }
     
-    return res.json();
+    const data = await res.json();
+    
+    // Map API response to Frontend Product type
+    return data.map((item: any) => ({
+      ...item,
+      price: Number(item.price),
+      image_url: item.images?.find((img: any) => img.is_main)?.image_url || item.images?.[0]?.image_url || '/file.svg',
+    }));
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
